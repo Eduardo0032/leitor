@@ -1,0 +1,23 @@
+# A Supabase grátis pausa projetos sem atividade há 7 dias.
+# Uma vez por semana faz pedidos à API para o projeto continuar acordado.
+# A chave é a publishable (pública por desenho; os dados estão protegidos por RLS).
+name: keepalive
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: https://pcpyybunxtjiypyffrcz.supabase.co
+      SUPABASE_KEY: sb_publishable_rNos8eNam4gbFoPWPyvIew_KIz081ew
+    steps:
+      - name: Ping
+        run: |
+          auth=$(curl -s -o /dev/null -w '%{http_code}' "$SUPABASE_URL/auth/v1/settings" -H "apikey: $SUPABASE_KEY")
+          rest=$(curl -s -o /dev/null -w '%{http_code}' "$SUPABASE_URL/rest/v1/books?select=id&limit=1" -H "apikey: $SUPABASE_KEY")
+          echo "auth: $auth, rest: $rest"
+          test "$auth" = 200
